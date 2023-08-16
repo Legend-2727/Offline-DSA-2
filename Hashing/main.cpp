@@ -212,6 +212,7 @@ public:
     }
     void insert(string key, int value)
     {
+        Delete(key);
         int index = key_generator(key, N);
         int j = 1;
         int func1 = key_generator(key, N), func2 = auxHash(key);
@@ -231,6 +232,7 @@ public:
         int j = 1;
         while (values[index].first != key)
         {
+            if(values[index].first == "-1") return 0;
             index = (key_generator(key, N) + j * auxHash(key)) % N;
             j++;
         }
@@ -242,10 +244,11 @@ public:
         int j = 1;
         while (values[index].first != key)
         {
+            if(values[index].first == "-1") return;
             index = (key_generator(key, N) + j * auxHash(key)) % N;
             j++;
         }
-        values[index].first = "N";
+        values[index].first = "-1";
         values[index].second = 0;
     }
     void print()
@@ -286,6 +289,7 @@ public:
     }
     void insert(string key, int value)
     {
+        Delete(key);
         int index = key_generator(key, N);
         int j = 1;
         int func1 = key_generator(key, N), func2 = auxHash(key);
@@ -308,6 +312,7 @@ public:
         int func1 = key_generator(key, N), func2 = auxHash(key);
         while (values[index].first != key)
         {
+            if(values[index].first=="-1") return 0;
             index = (func1 + c1*j * func2 +c2*j*j) % N;
             j++;
         }
@@ -321,10 +326,11 @@ public:
         int func1 = key_generator(key, N), func2 = auxHash(key);
         while (values[index].first != key)
         {
+            if(values[index].first=="-1") return;
             index = (func1 + c1*j * func2 +c2*j*j) % N;
             j++;
         }
-        values[index].first = "N";
+        values[index].first = "-1";
         values[index].second = 0;
     }
     void print()
