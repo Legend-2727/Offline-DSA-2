@@ -29,17 +29,11 @@ int nearest_prime(int num)
         return 2;
     if (is_prime(num))
         return num;
-    int lower = num - 1;
-    int upper = num + 1;
+    int upper = num;
 
     while (true)
     {
-        if (is_prime(upper))
-            return upper;
-        if (is_prime(lower))
-            return lower;
-
-        lower--;
+        if (is_prime(upper)) return upper;
         upper++;
     }
 }
@@ -188,6 +182,7 @@ class Double_hashing_Hash_table
     vector<pair<string, int>> values;
     int N;
     function<int(string, int)> key_generator;
+    vector<int> status;
 
 public:
     Double_hashing_Hash_table(int n, function<int(string, int)> hash)
@@ -195,14 +190,16 @@ public:
         N = nearest_prime(n);
         key_generator = hash;
         values.resize(N, {"-1", 0});
+        status.resize(N,-1);
     }
     int auxHash(string k)
     {
         int small = N - 1;
-        while (!is_prime(small))
+        while (!is_prime(small) && small>2)
         {
             small--;
         }
+        small=max(2,small);
         int hash = 0;
         for (int i = 0; i < k.size(); i++)
         {
@@ -212,44 +209,50 @@ public:
     }
     void insert(string key, int value)
     {
-        Delete(key);
         int index = key_generator(key, N);
         int j = 1;
         int func1 = key_generator(key, N), func2 = auxHash(key);
         // dbg(func1,func2,N);
-        while (values[index].first != "-1")
+        while (status[index]==1)
         {
+            if(values[index].first==key)
+            {
+                values[index].second=value;
+                return;
+            }
             index = (func1 + j * func2) % N;
             j++;
             // dbg(index,values);
         }
         values[index].first = key;
         values[index].second = value;
+        status[index]=1;
     }
-    int find_data(string key)
+    int find_ind(string key)
     {
         int index = key_generator(key, N);
         int j = 1;
-        while (values[index].first != key)
+        while (j<N)
         {
-            if(values[index].first == "-1") return 0;
+            if(values[index].first==key) return index;
+            if(status[index] == -1) return -1;
             index = (key_generator(key, N) + j * auxHash(key)) % N;
             j++;
         }
-        return values[index].second;
+        return -1;
+    }
+    int find_data(string key){
+        int ind=find_ind(key);
+        if(ind==-1) return -1;
+        else return values[ind].second;
     }
     void Delete(string key)
     {
-        int index = key_generator(key, N);
-        int j = 1;
-        while (values[index].first != key)
-        {
-            if(values[index].first == "-1") return;
-            index = (key_generator(key, N) + j * auxHash(key)) % N;
-            j++;
-        }
+        int index=find_ind(key);
+        if(index<0) return;
         values[index].first = "-1";
         values[index].second = 0;
+        status[index]=0;
     }
     void print()
     {
@@ -265,6 +268,7 @@ class Custom_probing_Hash_table
     vector<pair<string, int>> values;
     int N;
     function<int(string, int)> key_generator;
+    vector<int> status;
 
 public:
     Custom_probing_Hash_table(int n, function<int(string, int)> hash)
@@ -272,14 +276,16 @@ public:
         N = nearest_prime(n);
         key_generator = hash;
         values.resize(N, {"-1", 0});
+        status.resize(N,-1);
     }
-    int auxHash(string k)
+    int auxHash(string k )
     {
         int small = N - 1;
-        while (!is_prime(small))
+        while (!is_prime(small) && small>=1)
         {
             small--;
         }
+        small=max(2,small);
         int hash = 0;
         for (int i = 0; i < k.size(); i++)
         {
@@ -289,49 +295,53 @@ public:
     }
     void insert(string key, int value)
     {
-        Delete(key);
         int index = key_generator(key, N);
         int j = 1;
         int func1 = key_generator(key, N), func2 = auxHash(key);
         int c1=2,c2=7;
         // dbg(func1,func2,N);
-        while (values[index].first != "-1")
+        while (status[index]==1)
         {
+            if(values[index].first==key)
+            {
+                values[index].second=value;
+                return;
+            }
             index = (func1 + c1*j * func2 +c2*j*j) % N;
             j++;
             // dbg(index,values);
         }
         values[index].first = key;
         values[index].second = value;
+        status[index]=1;
     }
-    int find_data(string key)
+    int find_ind(string key)
     {
+        int c1=2,c2=7;
         int index = key_generator(key, N);
         int j = 1;
-        int c1=2,c2=7;
         int func1 = key_generator(key, N), func2 = auxHash(key);
-        while (values[index].first != key)
+        while (j<N)
         {
-            if(values[index].first=="-1") return 0;
+            if(values[index].first==key) return index;
+            if(status[index] == -1) return -1;
             index = (func1 + c1*j * func2 +c2*j*j) % N;
             j++;
         }
-        return values[index].second;
+        return -1;
+    }
+    int find_data(string key){
+        int ind=find_ind(key);
+        if(ind==-1) return -1;
+        else return values[ind].second;
     }
     void Delete(string key)
     {
-        int index = key_generator(key, N);
-        int j = 1;
-        int c1=2,c2=7;
-        int func1 = key_generator(key, N), func2 = auxHash(key);
-        while (values[index].first != key)
-        {
-            if(values[index].first=="-1") return;
-            index = (func1 + c1*j * func2 +c2*j*j) % N;
-            j++;
-        }
+        int index=find_ind(key);
+        if(index<0) return;
         values[index].first = "-1";
         values[index].second = 0;
+        status[index]=0;
     }
     void print()
     {
