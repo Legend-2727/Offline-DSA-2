@@ -79,118 +79,97 @@ int hash2(string s, int n)
     int temp = (hash % n);
     return temp;
 }
-class Node
-{
-public:
-    string key;
-    int value;
-    Node *next;
-    Node(string k, int v)
-    {
-        key = k;
-        value = v;
-        next = NULL;
-    }
-};
 
 class Seperate_chaining_Hash_table
 {
-    vector<Node *> nodes;
+    vector<list<pair<string,int>>> nodes;
     int N;
     function<int(string, int)> key_generator;
+    int collision;
+    int probe;
 
 public:
     Seperate_chaining_Hash_table(int n, function<int(string, int)> hash)
     {
         N = nearest_prime(n);
-        nodes.resize(N, NULL);
+        nodes.resize(N);
         key_generator = hash;
+        collision=0;
+        probe=0;
     }
     void insert(string key, int value)
     {
         int index = key_generator(key, N);
-        Node *temp = nodes[index];
-        if (temp == NULL)
-        {
-            nodes[index] = new Node(key, value);
-            return;
-        }
-        while (temp->next != NULL)
-        {
-            if (temp->next->key == key)
-            {
-                temp->next->value = value;
-                return;
-            }
-            temp = temp->next;
-        }
-        temp->next = new Node(key, value);
-        return;
+        if(nodes[index].size()!=0) collision++;
+        nodes[index].push_back({key,value});
+
     }
     int find_data(string key)
     {
         int index = key_generator(key, N);
-        Node *temp = nodes[index];
-        while (temp != NULL)
-        {
-            if (temp->key == key)
-                return temp->value;
-            temp = temp->next;
+        for(auto it:nodes[index]){
+            probe++;
+            if((it).first == key){
+                return it.second;
+            }
         }
-        return 0;
+        return -1;
     }
     void Delete(string key)
     {
+        dbg(key);
         int index = key_generator(key, N);
-        Node *temp = nodes[index];
-        if (temp == NULL)
-            return;
-        if (temp->key == key)
+        dbg(index);
+        for(auto &it:nodes[index])
         {
-            nodes[index] = temp->next;
-        }
-        Node *prev = temp;
-        temp = temp->next;
-        while (temp != NULL)
-        {
-            if (temp->key == key)
+            if(it.first==key)
             {
-                prev->next = temp->next;
-                delete[] temp;
+                nodes[index].remove(it);
                 return;
             }
-            prev = temp;
-            temp = temp->next;
         }
     }
     void print()
     {
         for (int i = 0; i < nodes.size(); i++)
         {
-            Node *temp = nodes[i];
-            while (temp != NULL)
+            for(auto it:nodes[i])
             {
-                cout << i << ". " << temp->key << ' ' << temp->value << '\n';
-                temp = temp->next;
+                cout << i << ". " << it.first << ' ' << it.second << '\n';
             }
         }
     }
+    int get_collisions(){return collision;}
+    int get_probes(){return probe;}
 };
 
-class Double_hashing_Hash_table
+class Probing_Hash_table
 {
     vector<pair<string, int>> values;
     int N;
     function<int(string, int)> key_generator;
     vector<int> status;
+    int type;
+    int collision,probes;
 
 public:
-    Double_hashing_Hash_table(int n, function<int(string, int)> hash)
+    Probing_Hash_table(int n, function<int(string, int)> hash,int t)
     {
         N = nearest_prime(n);
         key_generator = hash;
         values.resize(N, {"-1", 0});
         status.resize(N,-1);
+        type=t;
+        collision=0;
+        probes=0;
+    }
+    int double_hashing(string key,int j)
+    {
+        return (key_generator(key,N)+j*auxHash(key))%N;
+    }
+    int custom_probing(string key,int j)
+    {
+        return (key_generator(key,N) + 2*j * auxHash(key) +7*j*j) % N;
     }
     int auxHash(string k)
     {
@@ -215,14 +194,19 @@ public:
         // dbg(func1,func2,N);
         while (status[index]==1)
         {
+            collision++;
             if(values[index].first==key)
             {
                 values[index].second=value;
                 return;
             }
-            index = (func1 + j * func2) % N;
+            if(type==1){
+                index=(double_hashing(key,j));
+            }
+            else{
+                index =(custom_probing(key,j));
+            }
             j++;
-            // dbg(index,values);
         }
         values[index].first = key;
         values[index].second = value;
@@ -234,11 +218,18 @@ public:
         int j = 1;
         while (j<N)
         {
+            probes++;
             if(values[index].first==key) return index;
             if(status[index] == -1) return -1;
-            index = (key_generator(key, N) + j * auxHash(key)) % N;
+            if(type==1){
+                index=(double_hashing(key,j));
+            }
+            else{
+                index =(custom_probing(key,j));
+            }
             j++;
         }
+        probes-=N;
         return -1;
     }
     int find_data(string key){
@@ -261,139 +252,65 @@ public:
             cout << i << ". " << values[i].first << " " << values[i].second << '\n';
         }
     }
-};
-
-class Custom_probing_Hash_table
-{
-    vector<pair<string, int>> values;
-    int N;
-    function<int(string, int)> key_generator;
-    vector<int> status;
-
-public:
-    Custom_probing_Hash_table(int n, function<int(string, int)> hash)
-    {
-        N = nearest_prime(n);
-        key_generator = hash;
-        values.resize(N, {"-1", 0});
-        status.resize(N,-1);
-    }
-    int auxHash(string k )
-    {
-        int small = N - 1;
-        while (!is_prime(small) && small>=1)
-        {
-            small--;
-        }
-        small=max(2,small);
-        int hash = 0;
-        for (int i = 0; i < k.size(); i++)
-        {
-            hash += (k[i] - 'a');
-        }
-        return small - hash % small;
-    }
-    void insert(string key, int value)
-    {
-        int index = key_generator(key, N);
-        int j = 1;
-        int func1 = key_generator(key, N), func2 = auxHash(key);
-        int c1=2,c2=7;
-        // dbg(func1,func2,N);
-        while (status[index]==1)
-        {
-            if(values[index].first==key)
-            {
-                values[index].second=value;
-                return;
-            }
-            index = (func1 + c1*j * func2 +c2*j*j) % N;
-            j++;
-            // dbg(index,values);
-        }
-        values[index].first = key;
-        values[index].second = value;
-        status[index]=1;
-    }
-    int find_ind(string key)
-    {
-        int c1=2,c2=7;
-        int index = key_generator(key, N);
-        int j = 1;
-        int func1 = key_generator(key, N), func2 = auxHash(key);
-        while (j<N)
-        {
-            if(values[index].first==key) return index;
-            if(status[index] == -1) return -1;
-            index = (func1 + c1*j * func2 +c2*j*j) % N;
-            j++;
-        }
-        return -1;
-    }
-    int find_data(string key){
-        int ind=find_ind(key);
-        if(ind==-1) return -1;
-        else return values[ind].second;
-    }
-    void Delete(string key)
-    {
-        int index=find_ind(key);
-        if(index<0) return;
-        values[index].first = "-1";
-        values[index].second = 0;
-        status[index]=0;
-    }
-    void print()
-    {
-        for (int i = 0; i < N; i++)
-        {
-            cout << i << ". " << values[i].first << " " << values[i].second << '\n';
-        }
-    }
+    int get_collisions(){return collision;}
+    int get_probes(){return probes;}
 };
 
 int main()
 {
-    int n, m;
-    cin >> n >> m;
+    freopen("out.txt","w",stdout);
+    srand(42);
+    int m=10000;
+    
     string words[m];
+    int v=1;
     for (int i = 0; i < m; i++)
     {
         int len = 5 + rand() % 5;
         words[i] = string_generator(len);
     }
-    Seperate_chaining_Hash_table SH1(n, hash1), SH2(n, hash2);
-    for (int i = 0; i < m; i++)
+    int arr[3]={5000,10000,20000};
+    //dbg(arr[2]);
+    for(int i=0;i<3;i++)
     {
-        SH1.insert(words[i], i + 1);
-        SH2.insert(words[i], i + 1);
+        int v=1;
+        Seperate_chaining_Hash_table sh1(arr[i],hash1),sh2(arr[i],hash2);
+        Probing_Hash_table dh1(arr[i],hash1,1) ,dh2(arr[i],hash2,1);
+        Probing_Hash_table ch1(arr[i],hash1,2) ,ch2(arr[i],hash2,2);
+        for(int j=0;j<min(10000,arr[i]);j++)
+        {
+            if(sh1.find_data(words[j])!=-1) continue;
+            sh1.insert(words[j],v);
+            sh2.insert(words[j],v);
+            dh1.insert(words[j],v);
+            dh2.insert(words[j],v);
+            ch1.insert(words[j],v);
+            ch2.insert(words[j],v);
+            v++;
+        }
+        for(int j=0;j<1000;j++)
+        {
+            int rnd=rand()%(min(10000,arr[i]));
+            //dbg(rnd);
+            sh1.find_data(words[rnd]);
+            sh2.find_data(words[rnd]);
+            dh1.find_data(words[rnd]);
+            dh2.find_data(words[rnd]);
+            ch1.find_data(words[rnd]);
+            ch2.find_data(words[rnd]);
+        }
+        cout<<"For n = "<<arr[i]<<"\n";
+        cout<<"Hash        Collision               Hash1              Hash2     \n";
+        cout<<"Table Size  resolution          #of     Average    #of     Average\n";
+        cout<<"            Method            Collison  Probes     Method  Probe  \n\n";
+        cout<<"            Chaining              "<<sh1.get_collisions()<<"       "<<sh1.get_probes();
+        cout<<"   "<<sh2.get_collisions()<<"        "<<sh2.get_probes()<<"\n\n";
+        cout<<"            Double Hashing        "<<dh1.get_collisions()<<"       "<<dh1.get_probes();
+        cout<<"   "<<dh2.get_collisions()<<"        "<<dh2.get_probes()<<"\n\n";
+        cout<<"            Custom Probing        "<<ch1.get_collisions()<<"       "<<ch1.get_probes();  
+        cout<<"   "<<ch2.get_collisions()<<"        "<<ch2.get_probes()<<"\n\n";
     }
-    SH1.print();
-    SH2.print();
-    Double_hashing_Hash_table DH1(n, hash1), DH2(n, hash2);
-    for (int i = 0; i < m; i++)
-    {
-        DH1.insert(words[i], i + 1);
-        DH2.insert(words[i], i + 1);
-    }
-    DH1.print();
-    DH2.print();
-    Custom_probing_Hash_table CH1(n, hash1), CH2(n, hash2);
-    for (int i = 0; i < m; i++)
-    {
-        CH1.insert(words[i], i + 1);
-        CH2.insert(words[i], i + 1);
-    }
-    CH1.print();
-    CH2.print();
-    // for(int i=0;i<n;i++)
-    // {
-    //     cout<<words[i]<<" "<<hash1(words[i],10)<<'\n';
-    // }
-    // for(int i=0;i<n;i++)
-    // {
-    //     cout<<hash2(words[i],10)<<'\n';
-    // }
+    
     return 0;
 }
 

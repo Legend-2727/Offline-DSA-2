@@ -1,0 +1,33 @@
+For n = 5000
+Hash        Collision               Hash1              Hash2     
+Table Size  resolution          #of     Average    #of     Average
+            Method            Collison  Probes     Method  Probe  
+
+            Chaining              1860       4071   1862        1511
+
+            Double Hashing        27519       6991   30809        6732
+
+            Custom Probing        33456       7733   35107        6415
+
+For n = 10000
+Hash        Collision               Hash1              Hash2     
+Table Size  resolution          #of     Average    #of     Average
+            Method            Collison  Probes     Method  Probe  
+
+            Chaining              3682       6528   3659        1440
+
+            Double Hashing        59632       6752   60882        5978
+
+            Custom Probing        59322       6755   73105        6022
+
+For n = 20000
+Hash        Collision               Hash1              Hash2     
+Table Size  resolution          #of     Average    #of     Average
+            Method            Collison  Probes     Method  Probe  
+
+            Chaining              2096       3691   2091        1216
+
+            Double Hashing        3905       1346   3873        1333
+
+            Custom Probing        3768       1372   3850        1328
+
