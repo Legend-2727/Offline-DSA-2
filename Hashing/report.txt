@@ -3,31 +3,31 @@ Hash        Collision               Hash1              Hash2
 Table Size  resolution          #of     Average    #of     Average
             Method            Collison  Probes     Method  Probe  
 
-            Chaining              1860       4071   1862        1511
+            Chaining            1860      4.071   1862      1.511
 
-            Double Hashing        27519       6991   30809        6732
+            Double Hashing      27519      6.991   30809      6.732
 
-            Custom Probing        33456       7733   35107        6415
+            Custom Probing      33456      7.733   35107      6.415
 
 For n = 10000
 Hash        Collision               Hash1              Hash2     
 Table Size  resolution          #of     Average    #of     Average
             Method            Collison  Probes     Method  Probe  
 
-            Chaining              3682       6528   3659        1440
+            Chaining            3682      6.528   3659      1.44
 
-            Double Hashing        59632       6752   60882        5978
+            Double Hashing      59632      6.752   60882      5.978
 
-            Custom Probing        59322       6755   73105        6022
+            Custom Probing      59322      6.755   73105      6.022
 
 For n = 20000
 Hash        Collision               Hash1              Hash2     
 Table Size  resolution          #of     Average    #of     Average
             Method            Collison  Probes     Method  Probe  
 
-            Chaining              2096       3691   2091        1216
+            Chaining            2096      3.691   2091      1.216
 
-            Double Hashing        3905       1346   3873        1333
+            Double Hashing      3905      1.346   3873      1.333
 
-            Custom Probing        3768       1372   3850        1328
+            Custom Probing      3768      1.372   3850      1.328
 

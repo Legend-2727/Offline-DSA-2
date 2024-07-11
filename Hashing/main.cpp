@@ -1,5 +1,4 @@
-#include <bits/stdc++.h>
-#include "../dbg.h"
+#include<bits/stdc++.h>
 using namespace std;
 
 const long long prime = 16777619;
@@ -88,6 +87,7 @@ class Seperate_chaining_Hash_table
     int collision;
     int probe;
 
+
 public:
     Seperate_chaining_Hash_table(int n, function<int(string, int)> hash)
     {
@@ -117,9 +117,7 @@ public:
     }
     void Delete(string key)
     {
-        dbg(key);
         int index = key_generator(key, N);
-        dbg(index);
         for(auto &it:nodes[index])
         {
             if(it.first==key)
@@ -140,7 +138,7 @@ public:
         }
     }
     int get_collisions(){return collision;}
-    int get_probes(){return probe;}
+    double get_probes(){return (1.0*probe)/1000;}
 };
 
 class Probing_Hash_table
@@ -244,6 +242,7 @@ public:
         values[index].first = "-1";
         values[index].second = 0;
         status[index]=0;
+        
     }
     void print()
     {
@@ -253,15 +252,14 @@ public:
         }
     }
     int get_collisions(){return collision;}
-    int get_probes(){return probes;}
+    double get_probes(){return (1.0*probes)/1000;}
 };
 
 int main()
 {
-    freopen("out.txt","w",stdout);
+    freopen("report.txt","w",stdout);
     srand(42);
     int m=10000;
-    
     string words[m];
     int v=1;
     for (int i = 0; i < m; i++)
@@ -271,6 +269,7 @@ int main()
     }
     int arr[3]={5000,10000,20000};
     //dbg(arr[2]);
+    
     for(int i=0;i<3;i++)
     {
         int v=1;
@@ -303,12 +302,12 @@ int main()
         cout<<"Hash        Collision               Hash1              Hash2     \n";
         cout<<"Table Size  resolution          #of     Average    #of     Average\n";
         cout<<"            Method            Collison  Probes     Method  Probe  \n\n";
-        cout<<"            Chaining              "<<sh1.get_collisions()<<"       "<<sh1.get_probes();
-        cout<<"   "<<sh2.get_collisions()<<"        "<<sh2.get_probes()<<"\n\n";
-        cout<<"            Double Hashing        "<<dh1.get_collisions()<<"       "<<dh1.get_probes();
-        cout<<"   "<<dh2.get_collisions()<<"        "<<dh2.get_probes()<<"\n\n";
-        cout<<"            Custom Probing        "<<ch1.get_collisions()<<"       "<<ch1.get_probes();  
-        cout<<"   "<<ch2.get_collisions()<<"        "<<ch2.get_probes()<<"\n\n";
+        cout<<"            Chaining            "<<sh1.get_collisions()<<"      "<<sh1.get_probes();
+        cout<<"   "<<sh2.get_collisions()<<"      "<<sh2.get_probes()<<"\n\n";
+        cout<<"            Double Hashing      "<<dh1.get_collisions()<<"      "<<dh1.get_probes();
+        cout<<"   "<<dh2.get_collisions()<<"      "<<dh2.get_probes()<<"\n\n";
+        cout<<"            Custom Probing      "<<ch1.get_collisions()<<"      "<<ch1.get_probes();  
+        cout<<"   "<<ch2.get_collisions()<<"      "<<ch2.get_probes()<<"\n\n";
     }
     
     return 0;

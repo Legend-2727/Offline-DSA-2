@@ -1,6 +1,0 @@
-operation time(ms)
-insert 0.00000000
-delete 0.00000000
-search 0.00000000
-trav 0.00000000
-total 0.00000000
